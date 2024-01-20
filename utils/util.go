@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"log"
+	"os"
 )
 
 func Handle(err error) {
@@ -19,4 +20,11 @@ func ToHexInt(num int64) []byte {
 		log.Panic(err)
 	}
 	return buff.Bytes()
+}
+
+func FileExists(fileAddr string) bool {
+	if _, err := os.Stat(fileAddr); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }

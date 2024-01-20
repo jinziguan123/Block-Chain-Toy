@@ -3,6 +3,7 @@ package blockchain
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/gob"
 	"goblockchain/transaction"
 	"goblockchain/utils"
 	"time"
@@ -31,9 +32,11 @@ func CreateBlock(prevhash []byte, txs []*transaction.Transaction) *Block {
 	return &block
 }
 
-func GenesisBlock() *Block {
-	tx := transaction.BaseTx([]byte("Leo Cao"))
-	return CreateBlock([]byte{}, []*transaction.Transaction{tx})
+func GenesisBlock(address []byte) *Block {
+	tx := transaction.BaseTx(address)
+	genesis := CreateBlock([]byte("CigaCase here"), []*transaction.Transaction{tx})
+	genesis.SetHash()
+	return genesis
 }
 
 func (b *Block) BackTransactionSummary() []byte {
@@ -43,4 +46,22 @@ func (b *Block) BackTransactionSummary() []byte {
 	}
 	summary := bytes.Join(txIDs, []byte{})
 	return summary
+}
+
+func (b *Block) Serialize() []byte {
+	//序列化区块生成字符串
+	var res bytes.Buffer
+	encoder := gob.NewEncoder(&res)
+	err := encoder.Encode(b)
+	utils.Handle(err)
+	return res.Bytes()
+}
+
+func DeSerializeBlock(data []byte) *Block {
+	//反序列化字符串生成区块
+	var block Block
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&block)
+	utils.Handle(err)
+	return &block
 }
